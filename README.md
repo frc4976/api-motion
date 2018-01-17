@@ -3,7 +3,7 @@
 This is a sample project containing the macro motion profiling system developed in the 2017 frc season. This project can be used as a base to create software for following seasons while leaving autonomous programming already complete. 
 
 #
-#### Requirements</h4>
+#### Requirements
 - A Java development eviroment
 - Java JDK 8
 #
@@ -19,14 +19,6 @@ This is a sample project containing the macro motion profiling system developed 
 		
 	to setup the project for you favorite IDE
 	
-3. while connected to the internet run 
-	
-		./gradlew build deploy
-		
-	this will download the required dependencies.
-	
-4. then connect to the robot and run
+3. Connected to the robot and run the following command to deploy code
 
-		./gradle build deploy --offline
-		
-	to upload code while connected to your robot
+		./gradlew deployFRCJava
