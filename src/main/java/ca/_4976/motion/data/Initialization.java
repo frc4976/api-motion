@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * later we clear this memory after saving the list in an immutable
  * location.
  */
-public class Initialization {
+public final class Initialization {
 
     public static ArrayList<Command> commands = new ArrayList<>();
 }

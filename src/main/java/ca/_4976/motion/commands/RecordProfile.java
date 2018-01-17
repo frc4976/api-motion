@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.command.Command;
  * This command allows the robot to start recording a new profile.
  * When complete the profile will be saved in memory ready to replay.
  */
-public class RecordProfile extends Command {
+public final class RecordProfile extends Command {
 
     public RecordProfile() {
 

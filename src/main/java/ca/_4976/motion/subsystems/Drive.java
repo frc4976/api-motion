@@ -1,18 +1,22 @@
 package ca._4976.motion.subsystems;
 
 import ca._4976.motion.commands.DriveWithJoystick;
+import ca.qormix.library.Lazy;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
+import static ca.qormix.library.Lazy.use;
 import static ca.qormix.library.Lazy.using;
 
 /**
  * The DriveTrain subsystem controls the robot's chassis and reads in
  * information about it's speed and posit ion.
  */
-public class Drive extends Subsystem implements Runnable {
+public final class Drive extends Subsystem implements Runnable {
 
     private VictorSP leftFront = new VictorSP(0);
     private VictorSP leftRear = new VictorSP(1);
@@ -29,6 +33,28 @@ public class Drive extends Subsystem implements Runnable {
 
     private boolean ramping = false;
     private boolean userControlEnabled = true;
+
+    public Drive() {
+
+        use(NetworkTableInstance.getDefault().getTable("Drive"), it -> {
+
+            NetworkTableEntry tableEntry = it.getEntry("Ramp Rate");
+
+            double[] rate = ramp;
+
+            if (!tableEntry.exists()) {
+
+                tableEntry.setDoubleArray(rate);
+                tableEntry.setPersistent();
+            }
+
+            it.addEntryListener((table, key, entry, value, flags) -> {
+
+                ramp = tableEntry.getDoubleArray(ramp);
+
+            }, 0);
+        });
+    }
 
     @Override protected void initDefaultCommand() { setDefaultCommand(new DriveWithJoystick()); }
 

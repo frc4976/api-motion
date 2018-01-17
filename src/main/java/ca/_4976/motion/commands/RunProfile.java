@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.command.Command;
 /**
  * This command will begin running the profile that is saved in memory.
  */
-public class RunProfile extends Command {
+public final class RunProfile extends Command {
 
     public RunProfile() {
 

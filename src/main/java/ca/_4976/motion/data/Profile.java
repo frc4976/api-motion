@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * This is the data we store for a motion profile. There
  * are also functions for serializing the data.
  */
-public class Profile {
+public final class Profile {
 
     public enum Format { JSON, CSV, EXCEL }
 
@@ -146,7 +146,7 @@ public class Profile {
         }
     }
 
-    public static String[] getAvalibleProfiles() {
+    public static String[] getAvailableProfiles() {
 
         try {
 

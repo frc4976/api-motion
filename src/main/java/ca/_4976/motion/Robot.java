@@ -1,5 +1,6 @@
 package ca._4976.motion;
 
+import ca._4976.motion.data.Profile;
 import ca._4976.motion.subsystems.Drive;
 import ca._4976.motion.subsystems.Motion;
 import edu.wpi.first.networktables.NetworkTable;
@@ -19,17 +20,21 @@ import static ca.qormix.library.Lazy.use;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
+public final class Robot extends IterativeRobot {
 
     public static OI oi;
-    public static Drive drive = new Drive();
-    public static Motion motion = new Motion();
 
-    private NetworkTableInstance instance = NetworkTableInstance.getDefault();
-    private NetworkTable table = instance.getTable("Log");
-    NetworkTableEntry leftDistance =  table.getEntry("Left Distance");
-    NetworkTableEntry rightDistance =  table.getEntry("Right Distance");
-    NetworkTableEntry isStopped =  table.getEntry("Is Stopped");
+    public final static Drive drive = new Drive();
+    public final static Motion motion = new Motion();
+
+    private final NetworkTableInstance instance = NetworkTableInstance.getDefault();
+    private final NetworkTable table = instance.getTable("Log");
+
+    private final NetworkTableEntry leftDistance =  table.getEntry("Left Distance");
+    private final NetworkTableEntry rightDistance =  table.getEntry("Right Distance");
+    private final NetworkTableEntry stopped =  table.getEntry("Is Stopped");
+
+    private final NetworkTableEntry profiles =  table.getEntry("Profiles");
 
     @Override public void robotInit() {
 
@@ -56,6 +61,8 @@ public class Robot extends IterativeRobot {
             rightDistance.setNumber(it[1]);
         });
 
-        isStopped.setBoolean(drive.isStopped());
+        stopped.setBoolean(drive.isStopped());
+
+        profiles.setStringArray(Profile.getAvailableProfiles());
     }
 }

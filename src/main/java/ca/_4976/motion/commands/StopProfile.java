@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.command.Command;
 /**
  * This command will stop a recording/running profile.
  */
-public class StopProfile extends Command {
+public final class StopProfile extends Command {
 
     public StopProfile() {
 

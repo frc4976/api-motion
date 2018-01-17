@@ -11,7 +11,7 @@ import java.io.*;
  *  then saved to memory ready to be run. The default directory is
  *  /home/lvuser/motion.
  */
-public class LoadProfile extends Command {
+public final class LoadProfile extends Command {
 
     private final String file;
 

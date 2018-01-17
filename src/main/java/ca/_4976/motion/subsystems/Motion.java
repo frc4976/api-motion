@@ -5,9 +5,7 @@ import ca._4976.motion.Robot;
 import ca._4976.motion.commands.SaveProfile;
 import ca._4976.motion.data.Moment;
 import ca._4976.motion.data.Profile;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
@@ -22,7 +20,7 @@ import static ca.qormix.library.Lazy.use;
  * The Motion subsystem controls records and plays back saved
  * information about the chassis speed and position.
  */
-public class Motion extends Subsystem {
+public final class Motion extends Subsystem {
 
     private DriverStation ds = DriverStation.getInstance();
     private Profile profile = Profile.blank();
@@ -33,27 +31,38 @@ public class Motion extends Subsystem {
     public ListenableCommand[] commands = new ListenableCommand[0];
     public ArrayList<Integer> report = new ArrayList<>();
 
-    private NetworkTableInstance instance = NetworkTableInstance.getDefault();
-    NetworkTable table = instance.getTable("Motion");
-    NetworkTableEntry tableP = table.getEntry("P");
-    NetworkTableEntry tableI = table.getEntry("I");
-    NetworkTableEntry tableD = table.getEntry("D");
-
-
     private double p, i, d;
 
     @Override protected void initDefaultCommand() { }
 
     public Motion() {
 
-        p = tableP.getDouble( 0);
-        i = tableI.getDouble( 0);
-        d = tableD.getDouble( 0);
+        use(NetworkTableInstance.getDefault().getTable("Motion"), it -> {
 
-        tableP.setPersistent();
-        tableI.setPersistent();
-        tableD.setPersistent();
+            NetworkTableEntry tableEntry = it.getEntry("PID");
 
+            double[] pid = { 0, 0, 0 };
+
+            if (!tableEntry.exists()) {
+
+               tableEntry.setDoubleArray(pid);
+               tableEntry.setPersistent();
+            }
+
+            p = pid[0];
+            i = pid[1];
+            d = pid[2];
+
+            it.addEntryListener((table, key, entry, value, flags) -> {
+
+                double[] val = tableEntry.getDoubleArray(new double[] { 0, 0, 0 });
+
+                p = val[0];
+                i = val[1];
+                d = val[2];
+
+           }, 0);
+        });
     }
 
     public boolean isRecording() { return isRecording; }

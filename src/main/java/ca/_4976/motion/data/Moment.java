@@ -3,7 +3,7 @@ package ca._4976.motion.data;
 /**
  * This is the data we store in a single tick of a profile.
  */
-public class Moment {
+public final class Moment {
 
     public final Integer[] commands;
 

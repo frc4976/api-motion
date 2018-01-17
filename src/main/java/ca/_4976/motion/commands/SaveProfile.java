@@ -12,7 +12,7 @@ import java.io.IOException;
  * This command allows saving motion profiles to the rio's file system.
  * The default directory is /home/lvuser/motion.
  */
-public class SaveProfile extends Command {
+public final class SaveProfile extends Command {
 
     private final Profile profile;
 
@@ -26,7 +26,7 @@ public class SaveProfile extends Command {
         try {
 
             //Making sure the directory is already available
-            Profile.getAvalibleProfiles();
+            Profile.getAvailableProfiles();
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(
                     new File("/home/lvuser/motion/" + profile.name + " - " + profile.version)));
