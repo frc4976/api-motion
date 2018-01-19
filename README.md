@@ -1,4 +1,4 @@
-# API-Motion<
+# API-Motion
  
 This is a sample project containing the macro motion profiling system developed in the 2017 frc season. This project can be used as a base to create software for following seasons while leaving autonomous programming already complete. 
 
