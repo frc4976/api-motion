@@ -31,13 +31,16 @@ public final class Motion extends Subsystem {
     public ListenableCommand[] commands = new ListenableCommand[0];
     public ArrayList<Integer> report = new ArrayList<>();
 
-    private double p, i, d;
+    private double p, i , d;
+
+    private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Motion");
+    private final NetworkTableEntry entryError = table.getEntry("Error");
 
     @Override protected void initDefaultCommand() { }
 
     public Motion() {
 
-        use(NetworkTableInstance.getDefault().getTable("Motion"), it -> {
+        use(table, it -> {
 
             NetworkTableEntry tableEntry = it.getEntry("PID");
 
@@ -135,10 +138,9 @@ public final class Motion extends Subsystem {
             double[] derivative = new double[2];
             double[] lastError = new double[2];
 
-
             while (isRunning && ds.isEnabled()) {
 
-                if (System.nanoTime() - lastTick >= timing) {
+                if (System.nanoTime() - lastTick >= timing)  {
 
                     lastTick = System.nanoTime();
 
@@ -149,6 +151,8 @@ public final class Motion extends Subsystem {
                         error[0] = moment.position[0] - it[0];
                         error[1] = moment.position[1] - it[1];
                     });
+
+                    entryError.setDoubleArray(error);
 
                     integral[0] += error[0];
                     integral[1] += error[1];
