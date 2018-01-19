@@ -105,7 +105,7 @@ public final class Profile {
 
                     String[] split = lines[i].split(",");
 
-                    Integer[] commands = new Integer[split.length - 9];
+                    Integer[] commands = new Integer[split.length - 8];
 
                     for (int c = 0; c < commands.length; c++) {
 
@@ -128,7 +128,7 @@ public final class Profile {
                     ));
                 }
 
-                String[] split = lines[0].split(": ");
+                String[] split = lines[0].split(": ")[1].split(" ");
 
                 return new Profile(
                        split[0],
