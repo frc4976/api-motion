@@ -26,7 +26,7 @@ public final class Drive extends Subsystem implements Runnable {
     private Encoder left = new Encoder(0, 1);
     private Encoder right = new Encoder(2, 3);
 
-    private double[] ramp = new double[] { 1 / 200, 0.1 / 200 }; // (change per second / ticks per second) { max accel, max jerk }
+    private double[] ramp = new double[] { 1.0 / 200, 0.1 / 200 }; // (change per second / ticks per second) { max accel, max jerk }
     private double[] target = { 0, 0 };
     private double[] velocity = { 0, 0 };
     private double[] acceleration = { 0, 0 };
@@ -76,7 +76,7 @@ public final class Drive extends Subsystem implements Runnable {
 
         if (userControlEnabled) {
 
-            double forward = joy.getRawAxis(3) - joy.getRawAxis(2);
+            double forward = joy.getRawAxis(4) - joy.getRawAxis(5);
 
             // Saves the joystick value as a power of 2 while still keeping the sign
             double turn = using(joy.getRawAxis(0), x -> x = x * x * (Math.abs(x) / x));
@@ -105,14 +105,12 @@ public final class Drive extends Subsystem implements Runnable {
 
                     if (Math.abs(velocity[i] - target[i]) > 0) {
 
-
-                        if (Math.abs(acceleration[i]) < ramp[0] 
-                                && Math.abs((target[0] - velocity[0]) / acceleration[0]) > Math.abs(acceleration[i]) / ramp[1])
+                        if (Math.abs(acceleration[i] + target[i] > velocity[i] ? ramp[1] : -ramp[1]) < ramp[0] 
+                                && Math.abs((target[i] - velocity[i]) / acceleration[i]) > Math.abs(acceleration[i]) / ramp[1])
                             acceleration[i] += target[i] > velocity[i] ? ramp[1] : -ramp[1];
 
                         if (Math.abs((target[i] - velocity[i]) / acceleration[i]) < Math.abs(acceleration[i]) / ramp[1])
                             acceleration[i] -= target[i] > velocity[i] ? ramp[1] : -ramp[1];
-
 
                         velocity[i] += acceleration[i];
 
