@@ -7,7 +7,9 @@ import ca._4976.motion.data.Moment;
 import ca._4976.motion.data.Profile;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,7 +22,7 @@ import static ca.qormix.library.Lazy.use;
  * The Motion subsystem controls records and plays back saved
  * information about the chassis speed and position.
  */
-public final class Motion extends Subsystem {
+public final class Motion extends Subsystem implements Sendable {
 
     private DriverStation ds = DriverStation.getInstance();
     private Profile profile = Profile.blank();
@@ -31,42 +33,13 @@ public final class Motion extends Subsystem {
     public ListenableCommand[] commands = new ListenableCommand[0];
     public ArrayList<Integer> report = new ArrayList<>();
 
-    private double p, i , d;
+    private double p = 0, i = 0, d = 0;
 
     private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Motion");
-    private final NetworkTableEntry entryError = table.getEntry("Error");
+    private final NetworkTableEntry leftError = table.getEntry("Left Error");
+    private final NetworkTableEntry rightError = table.getEntry("Right Error");
 
     @Override protected void initDefaultCommand() { }
-
-    public Motion() {
-
-        use(table, it -> {
-
-            NetworkTableEntry tableEntry = it.getEntry("PID");
-
-            double[] pid = { 0, 0, 0 };
-
-            if (!tableEntry.exists()) {
-
-               tableEntry.setDoubleArray(pid);
-               tableEntry.setPersistent();
-            }
-
-            p = pid[0];
-            i = pid[1];
-            d = pid[2];
-
-            it.addEntryListener((table, key, entry, value, flags) -> {
-
-                double[] val = tableEntry.getDoubleArray(new double[] { 0, 0, 0 });
-
-                p = val[0];
-                i = val[1];
-                d = val[2];
-
-           }, 0);
-        });
-    }
 
     public boolean isRecording() { return isRecording; }
 
@@ -152,7 +125,8 @@ public final class Motion extends Subsystem {
                         error[1] = moment.position[1] - it[1];
                     });
 
-                    entryError.setDoubleArray(error);
+                    leftError.setDouble(error[0]);
+                    rightError.setDouble(error[1]);
 
                     integral[0] += error[0];
                     integral[1] += error[1];
@@ -184,5 +158,17 @@ public final class Motion extends Subsystem {
                 }
             }
         }
+    }
+
+    @Override public void initSendable(SendableBuilder builder) {
+
+        setName("Motion Profile PID");
+
+        builder.setSmartDashboardType("PIDController");
+        builder.setSafeState(this::stop);
+        builder.addDoubleProperty("p", () -> p, it -> p = it);
+        builder.addDoubleProperty("i", () -> i, it -> i = it);
+        builder.addDoubleProperty("d", () -> d, it -> d = it);
+        builder.addBooleanProperty("enabled", this::isRunning, ignored -> {});
     }
 }

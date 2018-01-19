@@ -8,6 +8,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static ca.qormix.library.Lazy.use;
 
@@ -39,6 +40,10 @@ public final class Robot extends IterativeRobot {
     @Override public void robotInit() {
 
         oi = new OI();
+
+        SmartDashboard.putData(drive);
+        SmartDashboard.putData(motion);
+        SmartDashboard.putData(motion);
     }
 
     @Override public void autonomousPeriodic(){

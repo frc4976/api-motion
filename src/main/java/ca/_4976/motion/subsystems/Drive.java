@@ -6,8 +6,11 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static ca.qormix.library.Lazy.use;
 import static ca.qormix.library.Lazy.using;
@@ -16,7 +19,7 @@ import static ca.qormix.library.Lazy.using;
  * The DriveTrain subsystem controls the robot's chassis and reads in
  * information about it's speed and posit ion.
  */
-public final class Drive extends Subsystem implements Runnable {
+public final class Drive extends Subsystem implements Runnable, Sendable {
 
     private VictorSP leftFront = new VictorSP(0);
     private VictorSP leftRear = new VictorSP(1);
@@ -54,6 +57,9 @@ public final class Drive extends Subsystem implements Runnable {
 
             }, 0);
         });
+
+        SmartDashboard.putData("Left Drive Encoder", left);
+        SmartDashboard.putData("Right Drive Encoder", right);
     }
 
     @Override protected void initDefaultCommand() { setDefaultCommand(new DriveWithJoystick()); }
@@ -143,5 +149,14 @@ public final class Drive extends Subsystem implements Runnable {
         ramping = enable;
 
         if (enable) new Thread(this).start();
+    }
+
+    @Override public void initSendable(SendableBuilder builder) {
+
+        setName("Drive Output");
+
+        builder.setSmartDashboardType("DifferentialDrive");
+        builder.addDoubleProperty("Left Motor Speed", () -> getTankDrive()[0], ignored -> {});
+        builder.addDoubleProperty("Right Motor Speed", () -> -getTankDrive()[0], ignored -> {});
     }
 }
