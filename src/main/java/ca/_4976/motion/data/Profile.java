@@ -33,8 +33,8 @@ public final class Profile {
 
             default:
 
-                builder.append("Motion Profile: ").append(name).append(" ").append(version);
-                builder.append("\nLeft Output, Right Output,m Left Position, Right Position,m Left Velocity, Right Velocity,m Initialization...\n");
+                builder.append("Motion Profile: ").append(name).append(" ").append(version).append('\n');
+                builder.append("Left Output,Right Output,,Left Position,Right Position,,Left Velocity,Right Velocity\n");
 
                 for (Moment moment : moments) {
 
