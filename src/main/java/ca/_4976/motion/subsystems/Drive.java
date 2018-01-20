@@ -1,7 +1,6 @@
 package ca._4976.motion.subsystems;
 
 import ca._4976.motion.commands.DriveWithJoystick;
-import ca.qormix.library.Lazy;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
