@@ -11,6 +11,10 @@ import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -112,6 +116,8 @@ public final class Motion extends Subsystem implements Sendable {
             double[] derivative = new double[2];
             double[] lastError = new double[2];
 
+            StringBuilder builder = new StringBuilder();
+
             while (isRunning && ds.isEnabled() && interval < profile.moments.length) {
 
                 if (System.nanoTime() - lastTick >= timing)  {
@@ -143,15 +149,24 @@ public final class Motion extends Subsystem implements Sendable {
 
                     drive.setTankDrive(
                             moment.output[0]
-                                + p * error[0]
-                                + i * integral[0]
-                                + d * derivative[0]
+                                + (p * error[0])
+                                // + i * integral[0]
+                                // + d * derivative[0]
                             ,
                             moment.output[1]
-                                + p * error[1]
-                                + i * integral[1]
-                                + d * derivative[1]
+                                + (p * error[1])
+                                // + i * integral[1]
+                                // + d * derivative[1]
                     );
+
+                    System.out.println(p + " " + error[0]);
+
+                    use(drive.getTankDrive(), it -> {
+
+                        `builder.append(it[0]).append(",").append(it[1]);
+                    });
+
+                    builder.append("\n");
 
                     for (int command : moment.commands) commands[command].start();
 
@@ -159,6 +174,17 @@ public final class Motion extends Subsystem implements Sendable {
                 }
             }
 
+            try {
+
+                BufferedWriter writer = new BufferedWriter(new FileWriter(
+                    new File("/home/lvuser/motion/logs/" + profile.name + " - " + profile.version)));
+
+                writer.write(builder.toString());
+
+                writer.close();
+
+            } catch (IOException ignored) { }
+        
             isRunning = false;
         }
     }
