@@ -133,8 +133,8 @@ public final class Motion extends Subsystem implements Sendable {
 
                     use(drive.getEncoderRate(), it -> {
 
-                        derivative[0] = (error[0] - lastError[0]) / (1/200) - it[0];
-                        derivative[1] = (error[1] - lastError[1]) / (1/200) - it[1];
+                        derivative[0] = (error[0] - lastError[0]) / (1.0/200) - it[0];
+                        derivative[1] = (error[1] - lastError[1]) / (1./200) - it[1];
                     });
 
                     lastError[0] = error[0];
