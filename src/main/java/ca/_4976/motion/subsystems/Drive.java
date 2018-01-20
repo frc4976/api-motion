@@ -46,6 +46,9 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
     public Drive() {
 
+        left.setDistancePerPulse(0.0001114);
+        right.setDistancePerPulse(0.0001114);
+
         // Adding our varables to NetworkTables
         use(NetworkTableInstance.getDefault().getTable("Drive"), it -> {
 
@@ -128,8 +131,6 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
                 for (int i = 0; i < 2; i ++) { // Loop for the left and right drive motors
 
-                    if (target[i] == 0) target[i] = 0.00001;
-
                     // If the difference between the target and the actual is less then the maximum jerk we set the actual to the target
                     if (Math.abs(velocity[i] - target[i]) < ramp[1]) velocity[i] = target[i];
 
@@ -141,7 +142,7 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
                             acceleration[i] += target[i] > velocity[i] ? ramp[1] : -ramp[1]; // Increases acceleration towards the target
 
                         if (Math.abs((target[i] - velocity[i]) / acceleration[i]) < Math.abs(acceleration[i]) / ramp[1]) // Checks if we need to start decelerating
-                            acceleration[i] -= target[i] > velocity[i] ? ramp[1] : -ramp[1]; // Decreases acceleration towards 0
+                            acceleration[i] -= Math.abs(acceleration[i]) / acceleration[i] * ramp[1]; // Decreases acceleration towards 0
 
                         velocity[i] += acceleration[i]; // Applies the acceleration to our actual
 
@@ -152,6 +153,12 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
             }
         }
     }
+
+    public void resetEncoderPosition() { 
+
+        left.reset();
+        right.reset();
+     }
 
     /**
      * Gets the position from the robots drivetrain encoders
@@ -204,9 +211,12 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
      */
     public synchronized void enableRamping(boolean enable) {
 
-        ramping = enable; // Store if ramping is enabled
+        if (!ramping) {
 
-        if (enable) new Thread(this).start(); // If ramping is enabled start call run in a new thread;
+            ramping = enable; // Store if ramping is enabled
+
+            if (enable) new Thread(this).start(); // If ramping is enabled start call run in a new thread;
+        }
     }
 
     /**

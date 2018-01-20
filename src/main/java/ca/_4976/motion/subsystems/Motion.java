@@ -92,6 +92,7 @@ public final class Motion extends Subsystem implements Sendable {
             );
 
             new SaveProfile(profile).start();
+            isRecording = false;
         }
     }
 
@@ -111,7 +112,7 @@ public final class Motion extends Subsystem implements Sendable {
             double[] derivative = new double[2];
             double[] lastError = new double[2];
 
-            while (isRunning && ds.isEnabled()) {
+            while (isRunning && ds.isEnabled() && interval < profile.moments.length) {
 
                 if (System.nanoTime() - lastTick >= timing)  {
 
@@ -157,6 +158,8 @@ public final class Motion extends Subsystem implements Sendable {
                     interval++;
                 }
             }
+
+            isRunning = false;
         }
     }
 

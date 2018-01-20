@@ -41,10 +41,13 @@ public final class Robot extends IterativeRobot {
 
         oi = new OI();
 
-        drive.enableRamping(true);
-
         SmartDashboard.putData(drive);
         SmartDashboard.putData(motion);
+    }
+
+    @Override public void disabledInit() {
+        
+        motion.stop();
     }
 
     @Override public void autonomousPeriodic(){

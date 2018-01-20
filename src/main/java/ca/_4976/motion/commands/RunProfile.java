@@ -10,14 +10,12 @@ public final class RunProfile extends Command {
 
     public RunProfile() {
 
-        requires(Robot.motion);
-        requires(Robot.drive);
-
         willRunWhenDisabled();
     }
 
     @Override protected void initialize() {
 
+        Robot.drive.resetEncoderPosition();
         Robot.drive.setUserControlEnabled(false);
         Robot.motion.run();
     }

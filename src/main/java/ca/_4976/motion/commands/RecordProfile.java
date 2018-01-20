@@ -11,14 +11,12 @@ public final class RecordProfile extends Command {
 
     public RecordProfile() {
 
-        requires(Robot.drive);
-        requires(Robot.motion);
-
         willRunWhenDisabled();
     }
 
     @Override protected void initialize() {
 
+        Robot.drive.resetEncoderPosition();
         Robot.motion.record();
         Robot.drive.enableRamping(true);
     }
