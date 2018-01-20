@@ -20,24 +20,33 @@ import static ca.qormix.library.Lazy.using;
  */
 public final class Drive extends Subsystem implements Runnable, Sendable {
 
+    // The left drive motors pwm pins 0 and 1
     private VictorSP leftFront = new VictorSP(0);
     private VictorSP leftRear = new VictorSP(1);
+    
+     // The right drive motors pwm pins 2 and 3
     private VictorSP rightFront = new VictorSP(2);
     private VictorSP rightRear = new VictorSP(3);
 
+    // The encoders on the drive system
     private Encoder left = new Encoder(0, 1);
     private Encoder right = new Encoder(2, 3);
 
-    private double[] ramp = new double[] { 1.0 / 200, 0.1 / 200 }; // (change per second / ticks per second) { max accel, max jerk }
+    // The ramping rate (change per second / ticks per second) { max accel, max jerk }
+    private double[] ramp = new double[] { 1.0 / 200, 0.1 / 200 }; 
+    
+    // Stored varables for calculating the motor output when ramping
     private double[] target = { 0, 0 };
     private double[] velocity = { 0, 0 };
     private double[] acceleration = { 0, 0 };
 
+    // Flags
     private boolean ramping = false;
     private boolean userControlEnabled = true;
 
     public Drive() {
 
+        // Adding our varables to NetworkTables
         use(NetworkTableInstance.getDefault().getTable("Drive"), it -> {
 
             NetworkTableEntry tableEntry = it.getEntry("Ramp Rate");
@@ -61,78 +70,116 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
         SmartDashboard.putData("Right Drive Encoder", right);
     }
 
+    /**
+     * Used by command based robot to create looping joystick input
+     */
     @Override protected void initDefaultCommand() { setDefaultCommand(new DriveWithJoystick()); }
 
+    /**
+     * Set user control enabled or disabled
+     * 
+     * @return enabled: enable usercontrol
+     */
     public void setUserControlEnabled(boolean enabled) {
 
         if (!enabled) ramping = false;
         userControlEnabled = enabled;
     }
 
-    public void stop() {
-
-        leftFront.set(0);
-        leftRear.set(0);
-        rightFront.set(0);
-        rightRear.set(0);
-    }
+    /**
+     * Applies Zero throttle to the drive motors
+     */
+    public void stop() { setTankDrive(0, 0); }
 
     public void arcadeDrive(Joystick joy) {
 
-        if (userControlEnabled) {
+        if (userControlEnabled) { // Used to disable user input when running a profile.
 
+            // Save the left and right trigger values as a combined value
             double forward = joy.getRawAxis(4) - joy.getRawAxis(5);
 
             // Saves the joystick value as a power of 2 while still keeping the sign
             double turn = using(joy.getRawAxis(0), x -> x = x * x * (Math.abs(x) / x));
 
+            // Set our taget based on arcade style control
             target[0] = forward + turn;
             target[1] = -forward + turn;
 
+            // If ramping is disabled directly output the target to the motors
             if (!ramping) setTankDrive(target[0], target[1]);
         }
     }
 
+     /**
+     * The run function  is called when a new thread is started
+     *
+     * @see     java.lang.Thread#run()
+     */
     @Override public void run() {
 
-        double timing = 1e+9 / 200;
-        long lastTick = System.nanoTime() - (long) timing;
+        double timing = 1e+9 / 200; // Stores the time between ticks in ns
+        long lastTick = System.nanoTime() - (long) timing; // Stores the time of when the last tick started
 
-        while (ramping) {
+        while (ramping) { // Loop when ramping is enabled
 
-            if (System.nanoTime() - lastTick >= timing) {
+            if (System.nanoTime() - lastTick >= timing) { // Tick if the time between the last is greater then or equal to the timing
 
-                lastTick = System.nanoTime();
+                lastTick = System.nanoTime(); // Store the current system time 
 
-                for (int i = 0; i < 2; i ++) {
+                for (int i = 0; i < 2; i ++) { // Loop for the left and right drive motors
 
+                    // If the difference between the target and the actual is less then the maximum jerk we set the actual to the target
                     if (Math.abs(velocity[i] - target[i]) < ramp[1]) velocity[i] = target[i];
 
+                    // Checks if we are moving towards the target
                     if (Math.abs(velocity[i] - target[i]) > 0) {
+ 
+                        if (Math.abs(acceleration[i] + target[i] > velocity[i] ? ramp[1] : -ramp[1]) < ramp[0] // Checks if we can still increase acceleration
+                                && Math.abs((target[i] - velocity[i]) / acceleration[i]) > Math.abs(acceleration[i]) / ramp[1]) // Checks if there is enough time to decelerate
+                            acceleration[i] += target[i] > velocity[i] ? ramp[1] : -ramp[1]; // Increases acceleration towards the target
 
-                        if (Math.abs(acceleration[i] + target[i] > velocity[i] ? ramp[1] : -ramp[1]) < ramp[0] 
-                                && Math.abs((target[i] - velocity[i]) / acceleration[i]) > Math.abs(acceleration[i]) / ramp[1])
-                            acceleration[i] += target[i] > velocity[i] ? ramp[1] : -ramp[1];
+                        else if (Math.abs((target[i] - velocity[i]) / acceleration[i]) < Math.abs(acceleration[i]) / ramp[1]) // Checks if we need to start decelerating
+                            acceleration[i] -= target[i] > velocity[i] ? ramp[1] : -ramp[1]; // Decreases acceleration towards 0
 
-                        if (Math.abs((target[i] - velocity[i]) / acceleration[i]) < Math.abs(acceleration[i]) / ramp[1])
-                            acceleration[i] -= target[i] > velocity[i] ? ramp[1] : -ramp[1];
+                        velocity[i] += acceleration[i]; // Applies the acceleration to our actual
 
-                        velocity[i] += acceleration[i];
-
-                    } else acceleration[i] = 0;
+                    } else acceleration[i] = 0; // Resets acceleration to 0 when at the target
                 }
 
-                setTankDrive(velocity[0], velocity[1]);
+                setTankDrive(velocity[0], velocity[1]); // Outputs the actual to the drive motors
             }
         }
     }
 
+    /**
+     * Gets the position from the robots drivetrain encoders
+     * 
+     * @return The left and right encoder positions and saves them as a double array
+     */
     public Double[] getEncoderPosition() { return new Double[] { left.getDistance(), right.getDistance() }; }
 
+    /**
+     * Gets the velocity from the robots drivetrain encoders
+     * 
+     * @return The left and right encoder velocity and saves them as a double array
+     */
     public Double[] getEncoderRate() { return new Double[] { left.getRate(), right.getRate() }; }
 
+
+    /**
+     * Uses the drivetrain encoders to determine when the robot has stopped.
+     * 
+     * @return boolean value indicating if the robot is not moving
+     */
     public boolean isStopped() { return left.getStopped() && right.getStopped(); }
 
+
+    /**
+     * Outputs the the drive motors with a tanks style control
+     * 
+     * @param left: the output percentage of the left side of the drive ranging from -1 to 1
+     * @param right: the output percentage of the right side of the drive ranging from -1 to 1 
+     */
     public synchronized void setTankDrive(double left, double right) {
 
         leftFront.set(left);
@@ -141,15 +188,28 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
         rightRear.set(right);
     }
 
+    /**
+     * Gets the current output being applied to the drive motors
+     * 
+     * @return the left and right drive output as a double array
+     */
     public synchronized Double[] getTankDrive() { return new Double[] { leftFront.get(), rightFront.get() }; }
 
+    /**
+     * Set ramping enabled or disabled
+     * 
+     * @return enable: enable ramping
+     */
     public synchronized void enableRamping(boolean enable) {
 
-        ramping = enable;
+        ramping = enable; // Store if ramping is enabled
 
-        if (enable) new Thread(this).start();
+        if (enable) new Thread(this).start(); // If ramping is enabled start call run in a new thread;
     }
 
+    /**
+     * Called by the Smartdashboard class to create widgets for the dashboard
+     */
     @Override public void initSendable(SendableBuilder builder) {
 
         setName("Drive Output");
