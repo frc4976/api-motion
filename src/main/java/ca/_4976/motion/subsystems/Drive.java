@@ -128,6 +128,8 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
                 for (int i = 0; i < 2; i ++) { // Loop for the left and right drive motors
 
+                    if (target[i] == 0) target[i] = 0.00001;
+
                     // If the difference between the target and the actual is less then the maximum jerk we set the actual to the target
                     if (Math.abs(velocity[i] - target[i]) < ramp[1]) velocity[i] = target[i];
 
