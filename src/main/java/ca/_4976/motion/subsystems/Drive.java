@@ -96,7 +96,7 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
         if (userControlEnabled) { // Used to disable user input when running a profile.
 
             // Save the left and right trigger values as a combined value
-            double forward = joy.getRawAxis(4) - joy.getRawAxis(5);
+            double forward = joy.getRawAxis(3) - joy.getRawAxis(2);
 
             // Saves the joystick value as a power of 2 while still keeping the sign
             double turn = using(joy.getRawAxis(0), x -> x = x * x * (Math.abs(x) / x));
@@ -138,7 +138,7 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
                                 && Math.abs((target[i] - velocity[i]) / acceleration[i]) > Math.abs(acceleration[i]) / ramp[1]) // Checks if there is enough time to decelerate
                             acceleration[i] += target[i] > velocity[i] ? ramp[1] : -ramp[1]; // Increases acceleration towards the target
 
-                        else if (Math.abs((target[i] - velocity[i]) / acceleration[i]) < Math.abs(acceleration[i]) / ramp[1]) // Checks if we need to start decelerating
+                        if (Math.abs((target[i] - velocity[i]) / acceleration[i]) < Math.abs(acceleration[i]) / ramp[1]) // Checks if we need to start decelerating
                             acceleration[i] -= target[i] > velocity[i] ? ramp[1] : -ramp[1]; // Decreases acceleration towards 0
 
                         velocity[i] += acceleration[i]; // Applies the acceleration to our actual
@@ -216,6 +216,6 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
         builder.setSmartDashboardType("DifferentialDrive");
         builder.addDoubleProperty("Left Motor Speed", () -> getTankDrive()[0], ignored -> {});
-        builder.addDoubleProperty("Right Motor Speed", () -> -getTankDrive()[0], ignored -> {});
+        builder.addDoubleProperty("Right Motor Speed", () -> -getTankDrive()[1], ignored -> {});
     }
 }

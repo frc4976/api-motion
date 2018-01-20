@@ -17,7 +17,7 @@ public final class OI {
 
     OI() {
 
-        new JoystickButton(operator, 7).whenPressed(new RecordProfile());
-        new JoystickButton(operator, 8).whenPressed(new RunProfile());
+        new JoystickButton(driver, 7).whenPressed(new RecordProfile());
+        new JoystickButton(driver, 8).whenPressed(new RunProfile());
     }
 }

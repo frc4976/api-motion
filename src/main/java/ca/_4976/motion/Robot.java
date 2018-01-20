@@ -41,8 +41,9 @@ public final class Robot extends IterativeRobot {
 
         oi = new OI();
 
+        drive.enableRamping(true);
+
         SmartDashboard.putData(drive);
-        SmartDashboard.putData(motion);
         SmartDashboard.putData(motion);
     }
 
