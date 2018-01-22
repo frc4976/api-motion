@@ -29,8 +29,8 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
     private VictorSP rightRear = new VictorSP(3);
 
     // The encoders on the drive system
-    private FakeEncoder left = new FakeEncoder(0, 1);
-    private FakeEncoder right = new FakeEncoder(2, 3);
+    private Encoder left = new Encoder(0, 1);
+    private Encoder right = new Encoder(2, 3);
 
     // The ramping rate (change per second / ticks per second) { max accel, max jerk }
     private double[] ramp = new double[] { 1.0 / 200, 0.1 / 200 }; 
@@ -48,10 +48,6 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
         left.setDistancePerPulse(0.0001114);
         right.setDistancePerPulse(0.0001114);
-
-        // USED FOR TESTING
-        leftFront.attach(left);
-        rightFront.attach(right);
 
         // Adding our varables to NetworkTables
         use(NetworkTableInstance.getDefault().getTable("Drive"), it -> {
