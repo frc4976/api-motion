@@ -29,7 +29,7 @@ import static ca.qormix.library.Lazy.use;
 public final class Motion extends Subsystem implements Sendable {
 
     private DriverStation ds = DriverStation.getInstance();
-    private Profile profile = Profile.blank();
+    public Profile profile = Profile.blank();
     private Drive drive = Robot.drive;
     private boolean isRunning = false;
     private boolean isRecording = false;
@@ -118,7 +118,10 @@ public final class Motion extends Subsystem implements Sendable {
 
             StringBuilder builder = new StringBuilder();
 
-            while (isRunning && ds.isEnabled() && interval < profile.moments.length) {
+            builder.append("Motion Profile Log: ").append(profile.name).append(" ").append(profile.version).append('\n');
+            builder.append("Left Output,Right Output,,Left Error,Right Error\n");
+
+            while (isRunning && interval < profile.moments.length && ds.isEnabled()) {  
 
                 if (System.nanoTime() - lastTick >= timing)  {
 
@@ -149,24 +152,18 @@ public final class Motion extends Subsystem implements Sendable {
 
                     drive.setTankDrive(
                             moment.output[0]
-                                + (p * error[0])
-                                // + i * integral[0]
-                                // + d * derivative[0]
+                                + p * error[0]
+                                + i * integral[0]
+                                + d * derivative[0]
                             ,
                             moment.output[1]
-                                + (p * error[1])
-                                // + i * integral[1]
-                                // + d * derivative[1]
+                                + p * error[1]
+                                + i * integral[1]
+                                + d * derivative[1]
                     );
 
-                    System.out.println(p + " " + error[0]);
-
-                    use(drive.getTankDrive(), it -> {
-
-                        `builder.append(it[0]).append(",").append(it[1]);
-                    });
-
-                    builder.append("\n");
+                    builder.append(moment.output[0]).append(",").append(moment.output[1]).append(",,");
+                    builder.append(error[0]).append(",").append(error[1]).append(",,");
 
                     for (int command : moment.commands) commands[command].start();
 
@@ -180,12 +177,12 @@ public final class Motion extends Subsystem implements Sendable {
                     new File("/home/lvuser/motion/logs/" + profile.name + " - " + profile.version)));
 
                 writer.write(builder.toString());
-
                 writer.close();
 
             } catch (IOException ignored) { }
         
             isRunning = false;
+            drive.setTankDrive(0, 0);
         }
     }
 

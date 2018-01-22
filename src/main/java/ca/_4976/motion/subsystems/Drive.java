@@ -1,6 +1,8 @@
 package ca._4976.motion.subsystems;
 
 import ca._4976.motion.commands.DriveWithJoystick;
+import ca.qormix.test.FakeEncoder;
+import ca.qormix.test.FakeMotor;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
@@ -21,16 +23,16 @@ import static ca.qormix.library.Lazy.using;
 public final class Drive extends Subsystem implements Runnable, Sendable {
 
     // The left drive motors pwm pins 0 and 1
-    private VictorSP leftFront = new VictorSP(0);
-    private VictorSP leftRear = new VictorSP(1);
+    private FakeMotor leftFront = new FakeMotor(0);
+    private FakeMotor leftRear = new FakeMotor(1);
     
      // The right drive motors pwm pins 2 and 3
-    private VictorSP rightFront = new VictorSP(2);
-    private VictorSP rightRear = new VictorSP(3);
+    private FakeMotor rightFront = new FakeMotor(2);
+    private FakeMotor rightRear = new FakeMotor(3);
 
     // The encoders on the drive system
-    private Encoder left = new Encoder(0, 1);
-    private Encoder right = new Encoder(2, 3);
+    private FakeEncoder left = new FakeEncoder(0, 1);
+    private FakeEncoder right = new FakeEncoder(2, 3);
 
     // The ramping rate (change per second / ticks per second) { max accel, max jerk }
     private double[] ramp = new double[] { 1.0 / 200, 0.1 / 200 }; 
@@ -48,6 +50,10 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
         left.setDistancePerPulse(0.0001114);
         right.setDistancePerPulse(0.0001114);
+
+        // USED FOR TESTING
+        leftFront.attach(left);
+        rightFront.attach(right);
 
         // Adding our varables to NetworkTables
         use(NetworkTableInstance.getDefault().getTable("Drive"), it -> {
@@ -83,11 +89,7 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
      * 
      * @return enabled: enable usercontrol
      */
-    public void setUserControlEnabled(boolean enabled) {
-
-        if (!enabled) ramping = false;
-        userControlEnabled = enabled;
-    }
+    public void setUserControlEnabled(boolean enabled) { userControlEnabled = enabled; }
 
     /**
      * Applies Zero throttle to the drive motors
@@ -96,13 +98,18 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
     public void arcadeDrive(Joystick joy) {
 
+        // Save the left and right trigger values as a combined value
+        double forward = joy.getRawAxis(3) - joy.getRawAxis(2);
+
+        // Saves the joystick value as a power of 2 while still keeping the sign
+        double turn = using(joy.getRawAxis(0), x -> x = x * x * (Math.abs(x) / x));
+
+        arcadeDrive(turn, forward);
+    }
+
+    public void arcadeDrive(double turn, double forward) {
+
         if (userControlEnabled) { // Used to disable user input when running a profile.
-
-            // Save the left and right trigger values as a combined value
-            double forward = joy.getRawAxis(3) - joy.getRawAxis(2);
-
-            // Saves the joystick value as a power of 2 while still keeping the sign
-            double turn = using(joy.getRawAxis(0), x -> x = x * x * (Math.abs(x) / x));
 
             // Set our taget based on arcade style control
             target[0] = forward + turn;
@@ -127,7 +134,7 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
             if (System.nanoTime() - lastTick >= timing) { // Tick if the time between the last is greater then or equal to the timing
 
-                lastTick = System.nanoTime(); // Store the current system time 
+                lastTick = System.nanoTime(); // Store the current system time
 
                 for (int i = 0; i < 2; i ++) { // Loop for the left and right drive motors
 
@@ -149,7 +156,7 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
                     } else acceleration[i] = 0; // Resets acceleration to 0 when at the target
                 }
 
-                setTankDrive(velocity[0], velocity[1]); // Outputs the actual to the drive motors
+                if (userControlEnabled) setTankDrive(velocity[0], velocity[1]); // Outputs the actual to the drive motors
             }
         }
     }

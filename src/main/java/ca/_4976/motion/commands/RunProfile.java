@@ -8,10 +8,7 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public final class RunProfile extends Command {
 
-    public RunProfile() {
-
-        willRunWhenDisabled();
-    }
+    public RunProfile() { willRunWhenDisabled(); }
 
     @Override protected void initialize() {
 

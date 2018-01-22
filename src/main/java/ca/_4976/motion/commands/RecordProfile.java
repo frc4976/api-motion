@@ -9,10 +9,7 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public final class RecordProfile extends Command {
 
-    public RecordProfile() {
-
-        willRunWhenDisabled();
-    }
+    public RecordProfile() { willRunWhenDisabled(); }
 
     @Override protected void initialize() {
 
@@ -22,4 +19,6 @@ public final class RecordProfile extends Command {
     }
 
     @Override protected boolean isFinished() { return !Robot.motion.isRecording(); }
+
+    @Override protected void end() { Robot.drive.enableRamping(false); }
 }
