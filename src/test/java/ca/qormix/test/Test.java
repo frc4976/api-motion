@@ -2,7 +2,6 @@ package ca.qormix.test;
 
 import ca._4976.motion.Robot;
 import ca._4976.motion.subsystems.Drive;
-import ca._4976.motion.subsystems.Motion;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.HLUsageReporting;
 import edu.wpi.first.wpilibj.Sendable;
@@ -21,52 +20,22 @@ public class Test {
             @Override public void reportSmartDashboard() { }
         });
 
+        Drive drive = Robot.drive;
+        drive.resetEncoderPosition();
+
         NetworkTableInstance.getDefault().setServer("localhost");
         NetworkTableInstance.getDefault().startServer();
 
-        Motion motion = Robot.motion;
-        Drive drive = Robot.drive;
+        SmartDashboard.putData(new SendableTest());
 
-        SmartDashboard.putData(drive);
-        SmartDashboard.putData(motion);
-        SmartDashboard.putData(new DriveTester());
+        while (true) {
 
-        drive.enableRamping(true);
-        motion.record();
-
-        Thread.sleep(50);
-
-        drive.arcadeDrive(0, 1);
-
-        Thread.sleep(1500);
-
-        drive.arcadeDrive(0, 0);
-
-        Thread.sleep(1500);
-
-        drive.arcadeDrive(0, -1);
-
-        Thread.sleep(1500);
-
-        drive.arcadeDrive(0, 0);
-
-        Thread.sleep(1500);
-
-        drive.enableRamping(false);
-        motion.stop();
-
-        Thread.sleep(50);
-
-        drive.setUserControlEnabled(false);
-        while (!Thread.interrupted()) {
-
-            if (!motion.isRunning()) motion.run();
-
-            Thread.sleep(200);
+            System.out.println("Still Running");
+            Thread.sleep(1000);
         }
     }
 
-    static class DriveTester implements Sendable {
+    static class SendableTest implements Sendable {
 
         @Override public String getName() { return "Drive Test"; }
 
@@ -78,9 +47,9 @@ public class Test {
 
         @Override public void initSendable(SendableBuilder builder) {
 
-            builder.setSmartDashboardType("differentialDrive");
+            builder.setSmartDashboardType("Encoder");
 
-            builder.addDoubleProperty("Output", () -> output, it -> output = it);
+            builder.addDoubleProperty("Speed", () -> output, it -> output = it);
         }
     }
 }

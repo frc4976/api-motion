@@ -1,8 +1,6 @@
 package ca._4976.motion.subsystems;
 
 import ca._4976.motion.commands.DriveWithJoystick;
-import ca.qormix.test.FakeEncoder;
-import ca.qormix.test.FakeMotor;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
@@ -23,12 +21,12 @@ import static ca.qormix.library.Lazy.using;
 public final class Drive extends Subsystem implements Runnable, Sendable {
 
     // The left drive motors pwm pins 0 and 1
-    private FakeMotor leftFront = new FakeMotor(0);
-    private FakeMotor leftRear = new FakeMotor(1);
+    private VictorSP leftFront = new VictorSP(0);
+    private VictorSP leftRear = new VictorSP(1);
     
      // The right drive motors pwm pins 2 and 3
-    private FakeMotor rightFront = new FakeMotor(2);
-    private FakeMotor rightRear = new FakeMotor(3);
+    private VictorSP rightFront = new VictorSP(2);
+    private VictorSP rightRear = new VictorSP(3);
 
     // The encoders on the drive system
     private FakeEncoder left = new FakeEncoder(0, 1);
