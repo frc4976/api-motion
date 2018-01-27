@@ -2,7 +2,7 @@ package ca._4976.motion;
 
 import ca._4976.motion.commands.RecordProfile;
 import ca._4976.motion.commands.RunProfile;
-import ca._4976.motion.commands.Transmition;
+import ca._4976.motion.commands.Transmission;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
@@ -20,6 +20,6 @@ public final class OI {
 
         new JoystickButton(driver, 7).whenPressed(new RecordProfile());
         new JoystickButton(driver, 8).whenPressed(new RunProfile());
-        new JoystickButton(driver, 4).whenPressed(new Transmition());
+        new JoystickButton(driver, 4).whenPressed(new Transmission());
     }
 }
