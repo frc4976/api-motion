@@ -3,10 +3,7 @@ package ca._4976.motion.subsystems;
 import ca._4976.motion.commands.DriveWithJoystick;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Sendable;
-import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,6 +16,9 @@ import static ca.qormix.library.Lazy.using;
  * information about it's speed and posit ion.
  */
 public final class Drive extends Subsystem implements Runnable, Sendable {
+
+    // The pneumatic solenoid
+    private DoubleSolenoid transmission = new DoubleSolenoid(10, 0, 1);
 
     // The left drive motors pwm pins 0 and 1
     private VictorSP leftFront = new VictorSP(0);
@@ -230,5 +230,8 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
         builder.setSmartDashboardType("DifferentialDrive");
         builder.addDoubleProperty("Left Motor Speed", () -> getTankDrive()[0], ignored -> {});
         builder.addDoubleProperty("Right Motor Speed", () -> -getTankDrive()[1], ignored -> {});
+    }
+    public void switchGear(){
+        System.out.println(transmission.get());
     }
 }
