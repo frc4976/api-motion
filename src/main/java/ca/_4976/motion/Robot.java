@@ -43,6 +43,8 @@ public final class Robot extends IterativeRobot {
 
         SmartDashboard.putData(drive);
         SmartDashboard.putData(motion);
+
+        Robot.drive.defaultGear();
     }
 
     @Override public void disabledInit() {

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 import static ca.qormix.library.Lazy.use;
 import static ca.qormix.library.Lazy.using;
@@ -18,7 +19,7 @@ import static ca.qormix.library.Lazy.using;
 public final class Drive extends Subsystem implements Runnable, Sendable {
 
     // The pneumatic solenoid
-    private DoubleSolenoid transmission = new DoubleSolenoid(10, 0, 1);
+    private DoubleSolenoid transmission = new DoubleSolenoid(10, 1, 6);
 
     // The left drive motors pwm pins 0 and 1
     private VictorSP leftFront = new VictorSP(0);
@@ -43,6 +44,9 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
     // Flags
     private boolean ramping = false;
     private boolean userControlEnabled = true;
+
+    //state og gear switch
+    private boolean gear = false;
 
     public Drive() {
 
@@ -231,7 +235,21 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
         builder.addDoubleProperty("Left Motor Speed", () -> getTankDrive()[0], ignored -> {});
         builder.addDoubleProperty("Right Motor Speed", () -> -getTankDrive()[1], ignored -> {});
     }
+    //Switches gear
     public void switchGear(){
-        System.out.println(transmission.get());
+        if (gear == false){
+            transmission.set(DoubleSolenoid.Value.kForward);
+        }
+        else{
+            transmission.set(DoubleSolenoid.Value.kOff);
+        }
+
+        gear = !gear;
+    }
+
+    //set the default state for the gear switch
+    public void defaultGear(){
+        gear = false;
+        transmission.set(DoubleSolenoid.Value.kOff);
     }
 }
