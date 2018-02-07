@@ -3,11 +3,13 @@ package ca._4976.motion.subsystems;
 import ca._4976.motion.commands.ListenableCommand;
 import ca._4976.motion.Robot;
 import ca._4976.motion.commands.SaveProfile;
+import ca._4976.motion.data.Initialization;
 import ca._4976.motion.data.Moment;
 import ca._4976.motion.data.Profile;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Sendable;
+import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
@@ -49,9 +51,21 @@ public final class Motion extends Subsystem implements Sendable {
 
     public boolean isRunning() { return isRunning; }
 
-    public synchronized void record() { new Thread(new Record()).start(); }
+    public synchronized void record() {
 
-    public synchronized void run() { new Thread(new Run()).start(); }
+        if (commands.length == 0)
+            commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
+
+        new Thread(new Record()).start();
+    }
+
+    public synchronized void run() {
+
+        if (commands.length == 0)
+            commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
+
+        new Thread(new Run()).start();
+    }
 
     public synchronized void stop() {
 
