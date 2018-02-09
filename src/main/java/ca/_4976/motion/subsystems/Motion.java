@@ -53,16 +53,22 @@ public final class Motion extends Subsystem implements Sendable {
 
     public synchronized void record() {
 
-        if (commands.length == 0)
+        if (commands.length == 0) {
+
             commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
+            Initialization.commands = null;
+        }
 
         new Thread(new Record()).start();
     }
 
     public synchronized void run() {
 
-        if (commands.length == 0)
+        if (commands.length == 0) {
+
             commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
+            Initialization.commands = null;
+        }
 
         new Thread(new Run()).start();
     }
