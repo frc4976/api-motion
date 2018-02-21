@@ -1,5 +1,7 @@
 package ca._4976.motion;
 
+import ca._4976.motion.commands.LoadProfile;
+import ca._4976.motion.commands.RunProfile;
 import ca._4976.motion.data.Profile;
 import ca._4976.motion.subsystems.Drive;
 import ca._4976.motion.subsystems.Motion;
@@ -48,6 +50,12 @@ public final class Robot extends IterativeRobot {
     @Override public void disabledInit() {
         
         motion.stop();
+    }
+
+    @Override public void autonomousInit() {
+
+        new LoadProfile("auto.csv").start();
+        new RunProfile().start();
     }
 
     @Override public void autonomousPeriodic(){

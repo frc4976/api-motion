@@ -29,8 +29,8 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
     private VictorSP rightRear = new VictorSP(3);
 
     // The encoders on the drive system
-    private Encoder left = new Encoder(0, 1);
-    private Encoder right = new Encoder(2, 3);
+    private Encoder right = new Encoder(0, 1);
+    private Encoder left = new Encoder(2, 3);
 
     // The ramping rate (change per second / ticks per second) { max accel, max jerk }
     private double[] ramp = new double[] { 1.0 / 200, 0.1 / 200 }; 
@@ -48,6 +48,9 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
 
         left.setDistancePerPulse(0.0001114);
         right.setDistancePerPulse(0.0001114);
+
+        left.setReverseDirection(true);
+        right.setReverseDirection(true);
 
         // Adding our varables to NetworkTables
         use(NetworkTableInstance.getDefault().getTable("Drive"), it -> {
@@ -212,12 +215,13 @@ public final class Drive extends Subsystem implements Runnable, Sendable {
      */
     public synchronized void enableRamping(boolean enable) {
 
-        if (!ramping) {
+        if (!ramping && enable) {
 
-            ramping = enable; // Store if ramping is enabled
+            ramping = true;
 
-            if (enable) new Thread(this).start(); // If ramping is enabled start call run in a new thread;
-        }
+            new Thread(this).start(); // If ramping is enabled start call run in a new thread;
+
+        } else ramping = false;
     }
 
     /**

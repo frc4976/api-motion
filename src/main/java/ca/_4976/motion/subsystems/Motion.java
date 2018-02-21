@@ -9,7 +9,6 @@ import ca._4976.motion.data.Profile;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Sendable;
-import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
@@ -36,7 +35,7 @@ public final class Motion extends Subsystem implements Sendable {
     private boolean isRunning = false;
     private boolean isRecording = false;
 
-    public ListenableCommand[] commands = new ListenableCommand[0];
+    private ListenableCommand[] commands = null;
     public ArrayList<Integer> report = new ArrayList<>();
 
     private double p = 0, i = 0, d = 0;
@@ -47,28 +46,36 @@ public final class Motion extends Subsystem implements Sendable {
 
     @Override protected void initDefaultCommand() { }
 
+    private void initCommands() {
+
+        if (commands == null) {
+
+            commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
+            Initialization.commands = null;
+        }
+    }
+
+    public ListenableCommand[] getCommands() {
+
+        initCommands();
+
+        return commands;
+    }
+
     public boolean isRecording() { return isRecording; }
 
     public boolean isRunning() { return isRunning; }
 
     public synchronized void record() {
 
-        if (commands.length == 0) {
-
-            commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
-            Initialization.commands = null;
-        }
+        initCommands();
 
         new Thread(new Record()).start();
     }
 
     public synchronized void run() {
 
-        if (commands.length == 0) {
-
-            commands = Initialization.commands.toArray(new ListenableCommand[Initialization.commands.size()]);
-            Initialization.commands = null;
-        }
+        initCommands();
 
         new Thread(new Run()).start();
     }
@@ -117,12 +124,17 @@ public final class Motion extends Subsystem implements Sendable {
 
             new SaveProfile(profile).start();
             isRecording = false;
+
+            drive.enableRamping(false);
         }
     }
 
     private class Run implements Runnable {
 
         @Override public void run() {
+
+            drive.enableRamping(false);
+            drive.setUserControlEnabled(false);
 
             isRunning = true;
 
@@ -140,6 +152,8 @@ public final class Motion extends Subsystem implements Sendable {
 
             builder.append("Motion Profile Log: ").append(profile.name).append(" ").append(profile.version).append('\n');
             builder.append("Left Output,Right Output,,Left Error,Right Error\n");
+
+            if (profile.moments.length == 0) System.out.println("No Profile Loaded");
 
             while (isRunning && interval < profile.moments.length && ds.isEnabled()) {  
 
@@ -203,6 +217,7 @@ public final class Motion extends Subsystem implements Sendable {
         
             isRunning = false;
             drive.setTankDrive(0, 0);
+            drive.setUserControlEnabled(true);
         }
     }
 
