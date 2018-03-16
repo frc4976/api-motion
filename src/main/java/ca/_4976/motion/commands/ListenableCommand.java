@@ -24,7 +24,7 @@ public abstract class ListenableCommand extends Command {
 
     @Override public void start() {
 
-        Robot.motion.report.add(id);
+        Robot.motion.report(id);
         super.start();
     }
 }

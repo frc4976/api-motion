@@ -36,6 +36,8 @@ public final class Motion extends Subsystem implements Sendable {
     private boolean isRecording = false;
 
     private ListenableCommand[] commands = null;
+
+    public boolean reportLock = false;
     public ArrayList<Integer> report = new ArrayList<>();
 
     private double p = 0, i = 0, d = 0;
@@ -103,6 +105,9 @@ public final class Motion extends Subsystem implements Sendable {
 
                     lastTick = System.nanoTime();
 
+                    while (reportLock);
+                    reportLock = true;
+
                     moments.add(new Moment(
                             report.toArray(new Integer[report.size()]),
                             Robot.drive.getTankDrive(),
@@ -111,6 +116,8 @@ public final class Motion extends Subsystem implements Sendable {
                     ));
 
                     report.clear();
+
+                    reportLock = false;
                 }
             }
 
@@ -219,6 +226,17 @@ public final class Motion extends Subsystem implements Sendable {
             drive.setTankDrive(0, 0);
             drive.setUserControlEnabled(true);
         }
+    }
+
+    public synchronized void report(int command) {
+
+        while (reportLock);
+
+        reportLock = true;
+
+        report.add(command);
+
+        reportLock = false;
     }
 
     @Override public void initSendable(SendableBuilder builder) {
